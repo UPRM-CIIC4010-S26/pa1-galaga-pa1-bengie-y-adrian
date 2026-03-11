@@ -34,6 +34,7 @@ void Program::Update() {
     }
     pauseFrames = std::max(pauseFrames - 1, 0);
 
+// añadi dentro de manageenemies un for para cada enemigo derrotado que te añada +100 puntos
     if (!startup && !paused && !gameOver && pauseFrames <= 0) {
         Enemy::ManageEnemies(player->hitBox);
         StdEnemy::attackReset();
@@ -63,8 +64,19 @@ void Program::Update() {
         if (lives <= 0 && pauseFrames <= 0) gameOver = true;
         Projectile::CleanProjectiles();
         Projectile::ProjectileCollision();
+
+        // AQUÍ se verifica si murieron enemigos
+        for (std::pair<std::pair<float, float>, Enemy*>& p : Enemy::enemies){
+            if (p.second && p.second->health <= 0){
+                score += 100;
+                delete p.second;
+                p.second = nullptr;
+            }
+        }
     }
 }
+
+// Voy a aumentar el score +500
 
 void Program::Draw() {
     background.Draw();
@@ -75,7 +87,11 @@ void Program::Draw() {
          DrawTexturePro(ImageManager::SpriteSheet, Rectangle{0, 0, 17, 18}, 
                    Rectangle{10.0f + i * 30, GetScreenHeight() - 30.0f, 20, 20}, 
                    Vector2{0, 0}, 0, WHITE);
+                  
     }
+
+    DrawText(TextFormat("Score: %i", score), 20, 20, 30, WHITE);
+    // añadir DrawText(TextFormat("Score: %i", score), 20, 20, 30, WHITE);
 
 
     for (Projectile p : Projectile::projectiles) p.draw();
@@ -89,9 +105,11 @@ void Program::Draw() {
 void Program::ManageEnemyRespawns() {
     delay = std::max(delay - 1, 0);
 
-    respawnCooldown -= 1;
+    // añadir update en la dificultad de los enemies en el respawn
+
+    respawnCooldown -= 1 + score / 2000;
     if (respawnCooldown <= 0) {
-        respawnCooldown = 1080;
+        respawnCooldown = std::max(300, 1080 - score / 5);
         for (std::pair<std::pair<float, float>, Enemy*>& p : Enemy::enemies) {
             if (!p.second && p.first.second != 150) {
                 int eType = GetRandomValue(1, 3);
@@ -163,6 +181,18 @@ void Program::KeyInputs() {
     }
 
     if (!startup && !paused && !gameOver && pauseFrames <= 0) player->keyInputs();
+
+    if (IsKeyPressed(KEY_K))
+{
+    score += 500;
+
+    if (score >= nextLifeScore && lives < 5)
+    {
+        lives++;
+        nextLifeScore += 1000;
+    }
+}
+// agregar press key k para +500
    
 }
 
@@ -186,5 +216,8 @@ void Program::Reset() {
     respawns = 0;
     count = 0;
     delay = 0;
-    lives = 3;
+    lives = 5;
+    // agregar score y next life score
+    score = 0;
+    nextLifeScore = 1000;
 }

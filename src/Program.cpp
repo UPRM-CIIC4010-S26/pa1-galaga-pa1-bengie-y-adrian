@@ -1,5 +1,12 @@
 #include "Program.hpp"
 
+/* 
+Finally, if you happen to lose all your lives, you will notice that enemies
+are not being re-added to the next iteration of the game. You will need
+to check where the game is being reset in the Program.cpp file to fix this
+issue. (Hint: You can use the same code in the Program() function to
+re-add the enemies to the game.)
+*/
 Program::Program() {
     Background::sideWalls = std::pair<HitBox, HitBox>{ 
         HitBox(0, 0, 10, GetScreenHeight()), 
@@ -17,8 +24,9 @@ Program::Program() {
         });
 
     for (int i = 0; i < 30; i++) {
-        float x = 250 + 50 * i;
-        float y = 200 + 50 * i;
+        //fix enemy spawn positions
+        float x = 250 + 50 * (i % 10);
+        float y = 200 + 50 * (i / 10);
 
         Enemy::enemies.push_back(std::pair<std::pair<float, float>, Enemy*> {
             std::pair<float, float>{x, y}, 
@@ -56,7 +64,12 @@ void Program::Update() {
         }
 
         for (Projectile& p : Projectile::projectiles) { 
-            p.update(); 
+            p.update();
+            //Check if enemy projectile hit player hitbox
+            if(p.ID != 0 && HitBox::Collision(player->hitBox, p.getHitBox()))
+            {
+                PlayerReset();
+            }
 
         }
 
@@ -187,4 +200,24 @@ void Program::Reset() {
     count = 0;
     delay = 0;
     lives = 3;
+    Enemy::enemies.push_back(std::pair<std::pair<float, float>, Enemy*> {
+            std::pair<float, float>{350, 150}, 
+            new SpEnemy(350, 150)
+        });
+
+    Enemy::enemies.push_back(std::pair<std::pair<float, float>, Enemy*> {
+            std::pair<float, float>{600, 150}, 
+            new SpEnemy(600, 150)
+        });
+
+    for (int i = 0; i < 30; i++) {
+        //fix enemy spawn positions
+        float x = 250 + 50 * (i % 10);
+        float y = 200 + 50 * (i / 10);
+
+        Enemy::enemies.push_back(std::pair<std::pair<float, float>, Enemy*> {
+            std::pair<float, float>{x, y}, 
+            new StdEnemy(x, y)
+        });
+    }
 }

@@ -1,12 +1,5 @@
 #include "Program.hpp"
 
-/* 
-Finally, if you happen to lose all your lives, you will notice that enemies
-are not being re-added to the next iteration of the game. You will need
-to check where the game is being reset in the Program.cpp file to fix this
-issue. (Hint: You can use the same code in the Program() function to
-re-add the enemies to the game.)
-*/
 Program::Program() {
     Background::sideWalls = std::pair<HitBox, HitBox>{ 
         HitBox(0, 0, 10, GetScreenHeight()), 

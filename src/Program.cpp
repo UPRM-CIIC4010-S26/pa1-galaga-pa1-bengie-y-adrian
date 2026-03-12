@@ -17,8 +17,9 @@ Program::Program() {
         });
 
     for (int i = 0; i < 30; i++) {
-        float x = 250 + 50 * i;
-        float y = 200 + 50 * i;
+        //fix enemy spawn positions
+        float x = 250 + 50 * (i % 10);
+        float y = 200 + 50 * (i / 10);
 
         Enemy::enemies.push_back(std::pair<std::pair<float, float>, Enemy*> {
             std::pair<float, float>{x, y}, 
@@ -34,7 +35,6 @@ void Program::Update() {
     }
     pauseFrames = std::max(pauseFrames - 1, 0);
 
-// añadi dentro de manageenemies un for para cada enemigo derrotado que te añada +100 puntos
     if (!startup && !paused && !gameOver && pauseFrames <= 0) {
         Enemy::ManageEnemies(player->hitBox);
         StdEnemy::attackReset();
@@ -57,7 +57,11 @@ void Program::Update() {
         }
 
         for (Projectile& p : Projectile::projectiles) { 
-            p.update(); 
+            p.update();
+            //Check if enemy projectile hit player hitbox
+            if(p.ID != 0 && HitBox::Collision(player->hitBox, p.getHitBox())){
+                PlayerReset();
+            }
 
         }
 
@@ -65,12 +69,13 @@ void Program::Update() {
         Projectile::CleanProjectiles();
         Projectile::ProjectileCollision();
 
-        // AQUÍ se verifica si murieron enemigos
+        // añadi dentro de manageenemies un for para cada enemigo derrotado que te añada +100 puntos
         for (std::pair<std::pair<float, float>, Enemy*>& p : Enemy::enemies){
-            if (p.second && p.second->health <= 0){
+            if (p.second != nullptr && p.second->health <= 0){
                 score += 100;
                 delete p.second;
                 p.second = nullptr;
+                
             }
         }
     }
@@ -220,4 +225,24 @@ void Program::Reset() {
     // agregar score y next life score
     score = 0;
     nextLifeScore = 1000;
+    Enemy::enemies.push_back(std::pair<std::pair<float, float>, Enemy*> {
+            std::pair<float, float>{350, 150}, 
+            new SpEnemy(350, 150)
+        });
+
+    Enemy::enemies.push_back(std::pair<std::pair<float, float>, Enemy*> {
+            std::pair<float, float>{600, 150}, 
+            new SpEnemy(600, 150)
+        });
+
+    for (int i = 0; i < 30; i++) {
+        //fix enemy spawn positions
+        float x = 250 + 50 * (i % 10);
+        float y = 200 + 50 * (i / 10);
+
+        Enemy::enemies.push_back(std::pair<std::pair<float, float>, Enemy*> {
+            std::pair<float, float>{x, y}, 
+            new StdEnemy(x, y)
+        });
+    }
 }

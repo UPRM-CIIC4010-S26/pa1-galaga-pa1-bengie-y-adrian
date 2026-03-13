@@ -17,8 +17,11 @@ class Program {
         int respawns = 0;
         int count = 0;
         int delay = 0;
-        int lives = 3;
+        int lives = 5;
         int pauseFrames = 0;
+        // añadi el score y el next live score
+        int score = 0;
+        int nextLifeScore = 1000;
 
         bool startup = true;
         bool paused = false;
